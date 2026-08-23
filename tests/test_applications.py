@@ -2,24 +2,24 @@
 Application CRUD and authorization tests.
 
 Tests:
-  4. Create application — verifies 201 and data in response
-  5. Get user's applications — verifies list contains the created application
-  6. Update application — verifies update persists (re-fetched from DB)
-  7. Delete application — verifies 204, then 404 on re-fetch
-  8. Authorization / ownership — User B cannot access, modify, or delete User A's data
+  4. Create application - verifies 201 and data in response
+  5. Get user's applications - verifies list contains the created application
+  6. Update application - verifies update persists (re-fetched from DB)
+  7. Delete application - verifies 204, then 404 on re-fetch
+  8. Authorization / ownership - User B cannot access, modify, or delete User A's data
 """
 
 import pytest
 from tests.conftest import SAMPLE_APPLICATION, create_user_and_login
 
 
-# ---------------------------------------------------------------------------
+ 
 # Test 4: Create application
-# ---------------------------------------------------------------------------
+ 
 def test_create_application(client, auth_headers):
     response = client.post("/applications", json=SAMPLE_APPLICATION, headers=auth_headers)
 
-    assert response.status_code == 201
+    assert response.status_code == 201 # Created successfully
 
     body = response.json()
 
@@ -29,9 +29,9 @@ def test_create_application(client, auth_headers):
     assert "message" in body
 
 
-# ---------------------------------------------------------------------------
+ 
 # Test 5: Get user's applications
-# ---------------------------------------------------------------------------
+ 
 def test_get_applications_contains_created(client, auth_headers):
     # Create one application
     client.post("/applications", json=SAMPLE_APPLICATION, headers=auth_headers)
@@ -41,7 +41,7 @@ def test_get_applications_contains_created(client, auth_headers):
 
     body = response.json()
 
-    # Response is paginated — items key holds the list
+    # Response is paginated - items key holds the list
     assert "items" in body
     items = body["items"]
 
@@ -59,9 +59,9 @@ def test_get_applications_contains_created(client, auth_headers):
     assert "id" in matched
 
 
-# ---------------------------------------------------------------------------
-# Test 6: Update application — change persists when re-fetched
-# ---------------------------------------------------------------------------
+ 
+# Test 6: Update application - change persists when re-fetched
+ 
 def test_update_application_persists(client, auth_headers):
     # Create
     create_resp = client.post("/applications", json=SAMPLE_APPLICATION, headers=auth_headers)
@@ -87,9 +87,9 @@ def test_update_application_persists(client, auth_headers):
     assert get_resp.json()["status"] == "Interview"
 
 
-# ---------------------------------------------------------------------------
-# Test 7: Delete application — gone after deletion
-# ---------------------------------------------------------------------------
+ 
+# Test 7: Delete application - gone after deletion
+ 
 def test_delete_application(client, auth_headers):
     client.post("/applications", json=SAMPLE_APPLICATION, headers=auth_headers)
 
@@ -105,9 +105,9 @@ def test_delete_application(client, auth_headers):
     assert get_resp.status_code == 404
 
 
-# ---------------------------------------------------------------------------
-# Test 8: Authorization / Ownership — User B cannot touch User A's data
-# ---------------------------------------------------------------------------
+ 
+# Test 8: Authorization / Ownership - User B cannot touch User A's data
+ 
 def test_user_cannot_access_other_users_application(client, auth_headers, auth_headers_b):
     # User A creates an application
     client.post("/applications", json=SAMPLE_APPLICATION, headers=auth_headers)

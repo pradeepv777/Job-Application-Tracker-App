@@ -32,9 +32,9 @@ class ApplicationUpdate(BaseModel):
     salary: int = Field(gt=10000)
     status: ApplicationStatus
 
-
+# used when GET /applications returns multiple applications, rather than one
 class PaginatedApplicationResponse(BaseModel):
-    page: int
+    page: int   
     limit: int
     total: int
     total_pages: int

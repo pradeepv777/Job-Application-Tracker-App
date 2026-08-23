@@ -1,19 +1,17 @@
 """
 Authentication tests.
-
 Tests:
-  1. Successful registration — verifies 201, expected message, no password leak
-  2. Successful login — verifies 200, access_token present and non-empty
-  3. Failed login (wrong password) — verifies 401 rejection
-  4. Duplicate email registration — verifies 400 rejection
+  1. Successful registration - verifies 201, expected message, no password leak
+  2. Successful login - verifies 200, access_token present and non-empty
+  3. Failed login (wrong password) - verifies 401 rejection
+  4. Duplicate email registration - verifies 400 rejection
 """
 
 import pytest
 
-
-# ---------------------------------------------------------------------------
+ 
 # Test 1: Successful registration
-# ---------------------------------------------------------------------------
+ 
 def test_register_success(client):
     payload = {
         "name": "Alice",
@@ -37,9 +35,9 @@ def test_register_success(client):
     assert payload["password"] not in str(body)
 
 
-# ---------------------------------------------------------------------------
+ 
 # Test 2: Successful login returns a valid access token
-# ---------------------------------------------------------------------------
+ 
 def test_login_success(client):
     # First register the user
     client.post(
@@ -69,9 +67,9 @@ def test_login_success(client):
     assert body["token_type"].lower() == "bearer"
 
 
-# ---------------------------------------------------------------------------
+ 
 # Test 3: Login with wrong password is rejected with 401
-# ---------------------------------------------------------------------------
+ 
 def test_login_wrong_password(client):
     client.post(
         "/auth/register",
@@ -83,15 +81,15 @@ def test_login_wrong_password(client):
         data={"username": "carol@example.com", "password": "wrongpassword"},
     )
 
-    # Must be rejected — not a success
+    # Must be rejected - not a success
     assert response.status_code == 401
     # Error detail must not reveal internal information
     assert "access_token" not in response.json()
 
 
-# ---------------------------------------------------------------------------
+ 
 # Test 4: Duplicate email registration is rejected with 400
-# ---------------------------------------------------------------------------
+ 
 def test_register_duplicate_email(client):
     payload = {
         "name": "Dave",

@@ -29,7 +29,8 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED
 )
 def create_application(
-    application: Application,
+    application: Application, # request body model from schemas
+    # company,sal,role etc. validation
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -76,12 +77,13 @@ def get_applications(
 
     if search:
         query = query.filter(
-            models.Application.company.ilike(f"%{search}%")
+            models.Application.company.ilike(f"%{search}%")# case-insensitive like query
+            #  search like -> ?search=google   == +  google + ==
         )
 
     if status:
-        query = query.filter(models.Application.status == status)
-    offset = (page - 1) * limit
+        query = query.filter(models.Application.status == status)# ?status=applied
+    offset = (page - 1) * limit # 10 default
     total = query.count()
     total_pages = max(1, math.ceil(total / limit))
     sort_columns = {
@@ -97,14 +99,14 @@ def get_applications(
     else:
         query = query.order_by(sort_column.asc())
 
-    applications = (
+    applications = (  # fetch the results from db
         query
         .offset(offset)
         .limit(limit)
         .all()
     )
 
-    return {
+    return {  # return results
         "page": page,
         "limit": limit,
         "total": total,
@@ -114,7 +116,7 @@ def get_applications(
 
 
 @router.get(
-    "/{application_id}",
+    "/{application_id}",  # path parameter -> takes from url -> /applications/1
     response_model=ApplicationRead,
     summary="Get application by ID",
     description="Returns a single job application based on its ID."

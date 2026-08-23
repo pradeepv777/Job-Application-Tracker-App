@@ -52,7 +52,7 @@ def get_analytics(
             func.sum(
                 case(
                     (models.Interview.result == "Scheduled", 1),
-                    else_=0
+                    else_=0 # if schedueld 1 else 0
                 )
             ).label("scheduled"),
             func.sum(

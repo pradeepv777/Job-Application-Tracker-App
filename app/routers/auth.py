@@ -48,21 +48,21 @@ def register(
         hashed_password=hashed_pw
     )
 
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-
+    db.add(db_user)  #insert obj
+    db.commit() 
+    db.refresh(db_user) # update db_user obj
+    # hash password, store login details, commit and return success message
     return RegisterResponse(message="User registered successfully")
 
 
 @router.post(
     "/login",
-    response_model=TokenResponse
+    response_model=TokenResponse # token response model
 )
-@limiter.limit("5/minute")
+@limiter.limit("5/minute") # rate limiting
 def login(
-    request: Request,
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    request: Request, # for rate limiting track ip
+    form_data: OAuth2PasswordRequestForm = Depends(), # for login credentials
     db: Session = Depends(get_db)
 ):
     db_user = (
@@ -76,9 +76,10 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
-
+    # create jwt token and return it after verification
     access_token = create_access_token(
         data={"sub": str(db_user.id)}
+        # ex. {"sub": "1"}  
     )
 
     return TokenResponse(

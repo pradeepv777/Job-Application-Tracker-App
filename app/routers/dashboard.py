@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.database import get_db
 from app.auth.dependencies import get_current_user
 from app.models.user import User
-
-from sqlalchemy import func
 from app import models
 
 
@@ -20,53 +19,23 @@ def dashboard(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-
-    total = (
-        db.query(func.count(models.Application.id))
+    # Single query, group by status instead of one query per status
+    status_counts = (
+        db.query(
+            models.Application.status,
+            func.count(models.Application.id)
+        )
         .filter(models.Application.user_id == current_user.id)
-        .scalar()
+        .group_by(models.Application.status)
+        .all()
     )
-
-    applied = (
-        db.query(func.count(models.Application.id))
-        .filter(
-            models.Application.user_id == current_user.id,
-            models.Application.status == "Applied"
-        )
-        .scalar()
-    )
-
-    interview = (
-        db.query(func.count(models.Application.id))
-        .filter(
-            models.Application.user_id == current_user.id,
-            models.Application.status == "Interview"
-        )
-        .scalar()
-    )
-
-    offer = (
-        db.query(func.count(models.Application.id))
-        .filter(
-            models.Application.user_id == current_user.id,
-            models.Application.status == "Offer"
-        )
-        .scalar()
-    )
-
-    rejected = (
-        db.query(func.count(models.Application.id))
-        .filter(
-            models.Application.user_id == current_user.id,
-            models.Application.status == "Rejected"
-        )
-        .scalar()
-    )
+    # converts set to dict for easy lookup ex. counts["Applied"]
+    counts = {s: count for s, count in status_counts}
 
     return {
-        "total_applications": total,
-        "applied": applied,
-        "interview": interview,
-        "offer": offer,
-        "rejected": rejected
+        "total_applications": sum(counts.values()),
+        "applied": counts.get("Applied", 0),
+        "interview": counts.get("Interview", 0),
+        "offer": counts.get("Offer", 0),
+        "rejected": counts.get("Rejected", 0),
     }

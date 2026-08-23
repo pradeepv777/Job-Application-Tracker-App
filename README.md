@@ -163,7 +163,7 @@ alembic upgrade head
 ### 5. Start the server
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn -m app.main:app --reload
 ```
 
 API available at `http://localhost:8000`.

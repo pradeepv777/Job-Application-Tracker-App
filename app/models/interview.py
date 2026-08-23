@@ -14,12 +14,12 @@ class Interview(Base):
         ForeignKey("applications.id")
     )
 
-    round = Column(String)
-    date = Column(Date)
-    time = Column(Time)
-    interviewer = Column(String)
-    notes = Column(String)
-    result = Column(String)
+    round = Column(String, nullable=False)
+    date = Column(Date, nullable=False)
+    time = Column(Time, nullable=False)
+    interviewer = Column(String, nullable=False)
+    notes = Column(String, nullable=False)
+    result = Column(String, nullable=False)
 
     application = relationship(
         "Application",

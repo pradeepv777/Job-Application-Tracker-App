@@ -28,7 +28,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# Global exception handler — prevents internal error details leaking to clients
+# Global exception handler prevents internal error details leaking to clients
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     logger.error("Unhandled exception: %s", exc, exc_info=True)
@@ -52,7 +52,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
-# CORS — restrict to configured frontend origins
+# CORS - restrict to configured frontend origins
 allowed_origins = [o.strip() for o in settings.ALLOWED_ORIGINS.split(",")]
 
 app.add_middleware(

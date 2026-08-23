@@ -7,7 +7,7 @@ class UserCreate(BaseModel):
     password: str
 
     @field_validator("password")
-    @classmethod
+    @classmethod  # refers to UserCreate class itself
     def password_min_length(cls, v: str) -> str:
         if len(v) < 8:
             raise ValueError("Password must be at least 8 characters")
@@ -15,9 +15,9 @@ class UserCreate(BaseModel):
 
 
 class RegisterResponse(BaseModel):
-    message: str
+    message: str #ensure the response is a string
 
 
 class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str
+    access_token: str  # JWT to authenticate requests
+    token_type: str  # Type of token (always "bearer")

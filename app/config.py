@@ -6,7 +6,8 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str
 
-    # PostgreSQL credentials (used by docker-compose, read by app for reference)
+    # PostgreSQL credentials — read by Docker Compose from .env directly.
+    # The app itself only uses DATABASE_URL; these are not referenced in code.
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = "job_application_tracker"

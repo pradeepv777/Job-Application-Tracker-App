@@ -69,10 +69,12 @@ def upload_resume(
             pass
 
     # Store only the filename — portable across environments
-    filename = f"{current_user.id}_{uuid.uuid4().hex}.pdf"
+    filename = f"{current_user.id}_{uuid.uuid4().hex}.pdf" # eg. 5_a8f3c21e9b7d4e1a.pdf
     abs_path = os.path.join(upload_dir, filename)
-
-    with open(abs_path, "wb") as buffer:
+    """
+    if 2 resume have same name so it will overwrite
+    """
+    with open(abs_path, "wb") as buffer: #wb -> write binary
         buffer.write(contents)
 
     # Save relative filename only
