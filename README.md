@@ -1,4 +1,4 @@
-﻿# Job Application Tracker — Backend API
+# Job Application Tracker — Backend API
 
 ![Tests](https://github.com/pradeepv777/Job-Application-Tracker-Backend/actions/workflows/test.yml/badge.svg)
 
@@ -331,6 +331,88 @@ The test suite will use `test_tracker` by default. Override with the `TEST_DATAB
 
 ---
 
+---
+
+## Frontend
+
+The project includes a clean, lightweight, and fully functional Single Page Application (SPA) frontend built using ** HTML, CSS, and JavaScript** — without any external frameworks, npm packages, or build steps.
+
+### Frontend Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       Browser (SPA)                         │
+│  ┌───────────────┐   ┌─────────────────┐   ┌─────────────┐  │
+│  │  index.html   │   │  css/style.css  │   │  js/app.js  │  │
+│  └───────┬───────┘   └─────────────────┘   └──────┬──────┘  │
+│          │                                        │         │
+│          │           ┌─────────────────┐          │         │
+│          └───────────┤    js/api.js    │◄─────────┘         │
+│                      └────────┬────────┘                    │
+└───────────────────────────────┼─────────────────────────────┘
+                                │
+                      Fetch API │ HTTP / JSON / FormData
+                      JWT Auth  │ Bearer <token>
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    FastAPI Backend (API)                    │
+│  /auth          /applications          /interviews          │
+│  /resume        /dashboard             /analytics           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **`frontend/index.html`**: Semantic single-page layout containing Authentication (Login & Register), Applications Dashboard, Interview Modals, Resume Management Modal, and the Analytics dashboard.
+- **`frontend/css/`**: Modular CSS architecture without external frameworks:
+  - `base.css`: Design tokens, CSS variables, typography, reset.
+  - `layout.css`: Header, sticky navigation, SPA container, responsive layout.
+  - `components.css`: Form controls, buttons, tables, badges, modals, toasts, pagination.
+  - `pages.css`: Auth view, dashboard stats cards, toolbar, analytics view, resume status.
+  - `style.css`: Master index stylesheet importing all modular stylesheets.
+- **`frontend/js/api.js`**: Centralized API service wrapping standard `fetch()`, managing JWT storage in `localStorage`, unified error formatting (Pydantic & FastAPI responses), and automatic 401 session expiration handling.
+- **`frontend/js/ui.js`**: Reusable presentation helpers, toast notifications, string sanitization, and currency formatting.
+- **`frontend/js/auth.js`**: Authentication module handling login, registration, logout, and auth state views.
+- **`frontend/js/applications.js`**: Applications CRUD, dashboard summary statistics, search, filtering, sorting, and pagination.
+- **`frontend/js/interviews.js`**: Interview rounds management (scheduling, editing, deleting rounds).
+- **`frontend/js/resume.js`**: PDF resume file lifecycle (upload validation, download blob, delete, metadata status).
+- **`frontend/js/analytics.js`**: Analytics dashboard rendering salary stats, application breakdown, success rate, and interview metrics.
+- **`frontend/js/app.js`**: Main entrypoint and orchestrator connecting modules and managing global view routing.
+
+### Frontend Features
+
+1. **Authentication**: Register with email validation and $\ge$ 8-character password; login via standard OAuth2 password credentials; JWT token storage.
+2. **Session Expiry Handling**: Invalid or expired JWTs (HTTP 401) automatically clear credentials, alert the user, and return to the login screen.
+3. **Dashboard Metrics**: Real-time counter cards for Total Applications, Applied, Interview, Offer, and Rejected.
+4. **Application CRUD**: Add new applications with input validation, edit existing ones, and delete with confirmation.
+5. **Search & Filtering**: Instant search by company name (debounced), status filtering (Applied, Interview, Offer, Rejected), multi-column sorting (ID, Company, Salary, Status, ASC/DESC), and customizable pagination (5, 10, 20 items per page).
+6. **Interview Tracking**: Schedule interview rounds for any application with date, time, interviewer, status, and notes; edit and delete rounds.
+7. **Resume Management**: Upload PDF resumes ($\le$ 5 MB), download current resume, and delete existing resume.
+8. **Analytics Page**: Salary metrics (Average, Highest, Lowest), success rate percentage bar, and interview funnel breakdown (Total, Scheduled, Completed, Upcoming).
+9. **Logout**: Safely clears token and resets user session state.
+
+### Running the Frontend
+
+#### Method 1: Served Directly by FastAPI (Recommended)
+
+When you run the backend server, FastAPI automatically serves the frontend at the root path (`/`):
+
+```bash
+uvicorn app.main:app --reload
+```
+Open **`http://localhost:8000`** in your browser. No separate web server is required.
+
+#### Method 2: Standalone Static Server (Live Server / Python)
+
+If you prefer running the frontend separately from the backend:
+
+```bash
+# Using Python's built-in HTTP server:
+python -m http.server 5173 --directory frontend
+```
+Or open the `frontend/` directory using VS Code **Live Server** (`http://127.0.0.1:5500`).  
+The frontend automatically detects the port and routes API requests to `http://localhost:8000`.
+
+---
+
 ## Project Structure
 
 ```
@@ -358,13 +440,33 @@ JobApplicationTracker-API/
 │   ├── config.py               # Pydantic settings, reads .env
 │   ├── database.py             # SQLAlchemy engine, session, get_db()
 │   ├── enums.py                # ApplicationStatus, InterviewResult
-│   └── main.py                 # FastAPI app, middleware, routers
+│   └── main.py                 # FastAPI app, static frontend mount, middleware, routers
+├── frontend/
+│   ├── index.html              # Single page application structure
+│   ├── img/
+│   │   └── auth_bg.jpg         # High-resolution authentication backdrop visual
+│   ├── css/
+│   │   ├── base.css            # Design tokens, variables, typography & CSS reset
+│   │   ├── layout.css          # Header, navigation, SPA containers & responsive structure
+│   │   ├── components.css      # Buttons, cards, tables, forms, modals, badges & toasts
+│   │   ├── pages.css           # View-specific styles (auth, dashboard stats, analytics, resume)
+│   │   └── style.css           # Master CSS index importing modular stylesheets
+│   └── js/
+│       ├── api.js              # Centralized fetch client & JWT handler
+│       ├── ui.js               # Shared presentation utilities & toast notifications
+│       ├── auth.js             # Authentication form handling & session UI
+│       ├── applications.js     # Applications CRUD, dashboard counters & table
+│       ├── interviews.js       # Interview rounds management
+│       ├── resume.js           # PDF resume file lifecycle
+│       ├── analytics.js        # Analytics metrics & pipeline visualization
+│       └── app.js              # Main orchestrator & view router
 ├── alembic/
 │   └── versions/               # Migration files
 ├── tests/
 │   ├── conftest.py             # Fixtures, test DB setup, dependency overrides
 │   ├── test_auth.py            # Authentication tests
-│   └── test_applications.py    # Application CRUD and authorization tests
+│   ├── test_applications.py    # Application CRUD and authorization tests
+│   └── test_frontend.py        # Static file and frontend routing tests
 ├── .env.example                # Environment variable template
 ├── .dockerignore
 ├── Dockerfile
