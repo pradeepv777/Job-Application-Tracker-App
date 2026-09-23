@@ -1,20 +1,20 @@
-# Job Application Tracker — Backend API
+# Job Application Tracker 
 
 ![Tests](https://github.com/pradeepv777/Job-Application-Tracker-Backend/actions/workflows/test.yml/badge.svg)
 
-A REST API for job seekers to manage their entire placement journey in one place. Track applications, schedule interviews, upload your resume, and get analytics — all secured with JWT authentication.
+An application for job seekers to manage their entire placement journey in one place. Track applications, schedule interviews, upload your resume, and get analytics - all secured with JWT authentication.
 
 ---
 
 ## Features
 
-- **JWT Authentication** — register, login, and protect every route with Bearer tokens
-- **Job Applications** — full CRUD with pagination, search, status filter, and multi-field sorting
-- **Interview Tracking** — schedule and manage interview rounds linked to applications
-- **Resume Management** — upload, download, and delete PDF resumes (5 MB limit)
-- **Dashboard** — application count broken down by status
-- **Analytics** — salary statistics, success rate, and interview metrics
-- **Security** — bcrypt password hashing, ownership checks on every resource, security headers middleware, rate limiting on login
+- **JWT Authentication** - register, login, and protect every route with Bearer tokens
+- **Job Applications** - full CRUD with pagination, search, status filter, and multi-field sorting
+- **Interview Tracking** - schedule and manage interview rounds linked to applications
+- **Resume Management** - upload, download, and delete PDF resumes (5 MB limit)
+- **Dashboard** - application count broken down by status
+- **Analytics** - salary statistics, success rate, and interview metrics
+- **Security** - bcrypt password hashing, ownership checks on every resource, security headers middleware, rate limiting on login
 
 ---
 
@@ -44,7 +44,7 @@ A REST API for job seekers to manage their entire placement journey in one place
 
 ---
 
-## Quick Start — Docker (Recommended)
+## Quick Start - Docker (Recommended)
 
 Docker runs the full stack (API + PostgreSQL) with a single command. Migrations run automatically on startup.
 
@@ -85,7 +85,7 @@ Generate a strong secret key:
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-> `SECRET_KEY` must be at least 32 characters — the application validates this at startup and will refuse to start if it is too short.
+> `SECRET_KEY` must be at least 32 characters - the application validates this at startup and will refuse to start if it is too short.
 
 ### 3. Build and start
 
@@ -185,7 +185,7 @@ Interactive docs are available once the server is running:
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | `/health` | No | Liveness check — returns `{"status": "ok"}` |
+| GET | `/health` | No | Liveness check - returns `{"status": "ok"}` |
 
 ### Authentication
 
@@ -210,8 +210,8 @@ Interactive docs are available once the server is running:
 |---|---|---|---|
 | `page` | int | 1 | Page number |
 | `limit` | int | 10 | Items per page (max 100) |
-| `search` | string | — | Case-insensitive company name filter |
-| `status` | string | — | Filter by status |
+| `search` | string | - | Case-insensitive company name filter |
+| `status` | string | - | Filter by status |
 | `sort_by` | string | `id` | Sort field: `id`, `company`, `salary`, `status` |
 | `order` | string | `asc` | Sort direction: `asc`, `desc` |
 
@@ -335,7 +335,7 @@ The test suite will use `test_tracker` by default. Override with the `TEST_DATAB
 
 ## Frontend
 
-The project includes a clean, lightweight, and fully functional Single Page Application (SPA) frontend built using ** HTML, CSS, and JavaScript** — without any external frameworks, npm packages, or build steps.
+The project includes a clean, lightweight, and fully functional Single Page Application (SPA) frontend built using ** HTML, CSS, and JavaScript** - without any external frameworks, npm packages, or build steps.
 
 ### Frontend Architecture
 
