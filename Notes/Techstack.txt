@@ -1,0 +1,29 @@
+Language & Runtime
+Python 3.13 — the language the entire backend is written in
+Web Framework
+FastAPI 0.141.1 — the API framework. Handles routing, request/response validation, dependency injection, and auto-generates the Swagger/ReDoc docs
+Uvicorn 0.52.1 — the ASGI server that actually runs FastAPI
+Starlette 1.3.1 — the underlying toolkit FastAPI is built on (used directly for middleware)
+Database
+PostgreSQL 17 — the relational database
+SQLAlchemy 2.0.51 — the ORM. Maps Python classes to DB tables and handles queries
+psycopg 3.3.4 — the PostgreSQL driver (the connector between SQLAlchemy and Postgres)
+Alembic 1.19.0 — handles database migrations (schema versioning)
+Authentication & Security
+python-jose 3.5.0 — creates and verifies JWT tokens
+Passlib 1.7.4 + bcrypt 4.0.1 — hashes and verifies passwords
+SlowAPI — rate limiting (5 requests/minute on the login endpoint)
+Data Validation
+Pydantic 2.13.4 — validates all request bodies and response shapes (schemas)
+pydantic-settings 2.14.2 — loads and validates environment variables from .env
+email-validator 2.3.0 — validates email format in the register schema
+File Handling
+python-multipart 0.0.32 — required by FastAPI to handle file uploads (resume PDFs)
+Testing
+pytest 8.3.5 — test runner
+httpx 0.28.1 — HTTP client used by FastAPI's TestClient under the hood
+Containerization & CI
+Docker + Docker Compose — packages the app and Postgres into containers
+GitHub Actions — runs the test suite automatically on every push (
+test.yml
+)

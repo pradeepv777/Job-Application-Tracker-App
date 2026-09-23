@@ -76,3 +76,10 @@ app.include_router(analytics.router)
 @app.get("/health", tags=["Health"], include_in_schema=True)
 def health():
     return {"status": "ok"}
+
+
+# Serve static frontend files if directory exists
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_dir):
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")

@@ -1,0 +1,13 @@
+/* ==========================================================================
+   Job Application Tracker - Master Stylesheet
+   Pure Vanilla CSS - Modular architecture:
+   - base.css:       Design tokens, reset, typography
+   - layout.css:     Header, sticky navigation, SPA container
+   - components.css: Form controls, buttons, tables, badges, modals, toasts
+   - pages.css:      Auth, dashboard stats, toolbar, analytics, resume
+   ========================================================================== */
+
+@import "base.css";
+@import "layout.css";
+@import "components.css";
+@import "pages.css";

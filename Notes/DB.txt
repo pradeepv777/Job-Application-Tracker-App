@@ -1,0 +1,160 @@
+================================================================================
+  JOB APPLICATION TRACKER — DATABASE RELATIONSHIP DIAGRAM
+================================================================================
+
+  3 Tables: users, applications, interviews
+  ORM: SQLAlchemy 2.0  |  Database: PostgreSQL 17
+
+
+────────────────────────────────────────────────────────────────────────────────
+  TABLES & COLUMNS
+────────────────────────────────────────────────────────────────────────────────
+
+┌──────────────────────────────────────────────────────┐
+│                        users                         │
+├──────────────────┬──────────┬────────────────────────┤
+│ Column           │ Type     │ Constraints             │
+├──────────────────┼──────────┼────────────────────────┤
+│ id               │ INTEGER  │ PRIMARY KEY, INDEX      │
+│ name             │ STRING   │ NOT NULL                │
+│ email            │ STRING   │ NOT NULL, UNIQUE, INDEX │
+│ hashed_password  │ STRING   │ NOT NULL                │
+│ resume_path      │ STRING   │ NULLABLE                │
+└──────────────────┴──────────┴────────────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│                     applications                     │
+├──────────────────┬──────────┬────────────────────────┤
+│ Column           │ Type     │ Constraints             │
+├──────────────────┼──────────┼────────────────────────┤
+│ id               │ INTEGER  │ PRIMARY KEY, INDEX      │
+│ user_id          │ INTEGER  │ NOT NULL, FK → users.id │
+│ company          │ STRING   │ NOT NULL                │
+│ role             │ STRING   │ NOT NULL                │
+│ salary           │ INTEGER  │ NOT NULL                │
+│ status           │ STRING   │ NOT NULL                │
+└──────────────────┴──────────┴────────────────────────┘
+  status allowed values: "Applied" | "Interview" | "Offer" | "Rejected"
+
+┌──────────────────────────────────────────────────────┐
+│                      interviews                      │
+├──────────────────┬──────────┬────────────────────────┤
+│ Column           │ Type     │ Constraints             │
+├──────────────────┼──────────┼────────────────────────┤
+│ id               │ INTEGER  │ PRIMARY KEY, INDEX      │
+│ application_id   │ INTEGER  │ FK → applications.id    │
+│ round            │ STRING   │ NOT NULL                │
+│ date             │ DATE     │ NOT NULL                │
+│ time             │ TIME     │ NOT NULL                │
+│ interviewer      │ STRING   │ NOT NULL                │
+│ notes            │ STRING   │ NOT NULL                │
+│ result           │ STRING   │ NOT NULL                │
+└──────────────────┴──────────┴────────────────────────┘
+  result allowed values: "Scheduled" | "Completed" | "Cancelled"
+
+
+────────────────────────────────────────────────────────────────────────────────
+  ENTITY RELATIONSHIP DIAGRAM
+────────────────────────────────────────────────────────────────────────────────
+
+  ┌───────────┐          ┌────────────────┐          ┌─────────────┐
+  │   users   │          │  applications  │          │  interviews │
+  ├───────────┤          ├────────────────┤          ├─────────────┤
+  │ PK id     │1       * │ PK id          │1       * │ PK id       │
+  │ name      │──────────│ FK user_id     │──────────│ FK app_id   │
+  │ email     │          │ company        │          │ round       │
+  │ hashed_pw │          │ role           │          │ date        │
+  │ resume_   │          │ salary         │          │ time        │
+  │   path    │          │ status         │          │ interviewer │
+  └───────────┘          └────────────────┘          │ notes       │
+                                                     │ result      │
+                                                     └─────────────┘
+
+  Cardinality:
+    users        ──< applications   (One user      → Many applications)
+    applications ──< interviews     (One application → Many interviews)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  RELATIONSHIPS DETAIL
+────────────────────────────────────────────────────────────────────────────────
+
+  users → applications
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  Type        : One-to-Many                                              │
+  │  FK          : applications.user_id → users.id                         │
+  │  SQLAlchemy  : User.applications  (back_populates="owner")             │
+  │               Application.owner   (back_populates="applications")      │
+  │  On Delete   : No explicit DB cascade — handled at app layer           │
+  │  Meaning     : Each user owns their own set of job applications.        │
+  │                A user can have zero or more applications.               │
+  │                An application always belongs to exactly one user.       │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  applications → interviews
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  Type        : One-to-Many                                              │
+  │  FK          : interviews.application_id → applications.id             │
+  │  SQLAlchemy  : Application.interviews (back_populates="application",   │
+  │                                        cascade="all, delete")          │
+  │               Interview.application   (back_populates="interviews")    │
+  │  On Delete   : CASCADE — deleting an application deletes all its       │
+  │                interviews automatically                                 │
+  │  Meaning     : Each application can have multiple interview rounds.     │
+  │                An interview always belongs to exactly one application.  │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────
+  CASCADE BEHAVIOUR
+────────────────────────────────────────────────────────────────────────────────
+
+  DELETE user
+      └── does NOT auto-delete applications (app layer deletes them first)
+
+  DELETE application
+      └── auto-deletes all linked interviews  ← cascade="all, delete"
+
+  This means you can never have a dangling interview with no application.
+
+
+────────────────────────────────────────────────────────────────────────────────
+  INDEXES
+────────────────────────────────────────────────────────────────────────────────
+
+  users.id           — Primary key index (auto)
+  users.email        — Unique index (fast login lookup)
+  applications.id    — Primary key index (auto)
+  interviews.id      — Primary key index (auto)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  MIGRATION HISTORY  (alembic/versions/)
+────────────────────────────────────────────────────────────────────────────────
+
+  1. a37e930e3e00  — initial_migration
+                    Created: users, applications tables
+
+  2. c539c9d3e83d  — create_interviews_table
+                    Created: interviews table
+
+  3. 8c8ac3a29774  — convert_interview_date_and_time_to_
+                    Changed date/time column types
+
+  4. 3dec8c5196cf  — add_resume_path_to_users
+                    Added: users.resume_path column
+
+
+────────────────────────────────────────────────────────────────────────────────
+  OWNERSHIP & DATA ISOLATION
+────────────────────────────────────────────────────────────────────────────────
+
+  Every query in the API filters by the authenticated user's id:
+
+    applications  →  WHERE user_id = current_user.id
+    interviews    →  JOIN applications WHERE user_id = current_user.id
+
+  Users can only see and modify their own data. There is no shared or
+  cross-user data access in any endpoint.
+
+================================================================================

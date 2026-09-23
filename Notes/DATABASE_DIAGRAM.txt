@@ -1,0 +1,82 @@
+================================================================================
+  JOB APPLICATION TRACKER — DATABASE RELATIONSHIP DIAGRAM
+================================================================================
+
+
+┌───────────────────────┐
+│         USERS         │
+├───────────────────────┤
+│ id            (PK)    │
+│ name                  │
+│ email         (UNIQUE)│
+│ hashed_password       │
+│ resume_path   (NULL)  │
+└──────────┬────────────┘
+           │
+           │  users.id referenced by applications.user_id
+           │  One user can have many applications
+           │
+           ▼
+┌───────────────────────┐
+│      APPLICATIONS     │
+├───────────────────────┤
+│ id            (PK)    │
+│ company               │
+│ role                  │
+│ salary                │
+│ status                │  → "Applied" | "Interview" | "Offer" | "Rejected"
+│ user_id       (FK) ───┼──────────────────────────────► users.id
+└──────────┬────────────┘
+           │
+           │  applications.id referenced by interviews.application_id
+           │  One application can have many interviews
+           │  Deleting an application cascades and deletes all its interviews
+           │
+           ▼
+┌───────────────────────┐
+│       INTERVIEWS      │
+├───────────────────────┤
+│ id            (PK)    │
+│ round                 │
+│ date                  │
+│ time                  │
+│ interviewer           │
+│ notes                 │
+│ result                │  → "Scheduled" | "Completed" | "Cancelled"
+│ application_id (FK) ──┼──────────────────────────────► applications.id
+└───────────────────────┘
+
+
+================================================================================
+  RELATIONSHIPS SUMMARY
+================================================================================
+
+  users        ──< applications    One-to-Many   (FK: applications.user_id)
+  applications ──< interviews      One-to-Many   (FK: interviews.application_id)
+
+  CASCADE:
+    DELETE application  →  automatically deletes all linked interviews
+    DELETE user         →  application layer deletes applications first
+
+
+================================================================================
+  INDEXES
+================================================================================
+
+  users.id            Primary key (auto)
+  users.email         Unique index  — fast login lookup
+  applications.id     Primary key (auto)
+  interviews.id       Primary key (auto)
+
+
+================================================================================
+  MIGRATION HISTORY
+================================================================================
+
+  1. a37e930e3e00  initial_migration              Created users, applications
+  2. c539c9d3e83d  create_interviews_table        Created interviews
+  3. 8c8ac3a29774  convert_interview_date_and_time Changed date/time col types
+  4. 3dec8c5196cf  add_resume_path_to_users        Added users.resume_path
+
+
+================================================================================
