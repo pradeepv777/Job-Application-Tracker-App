@@ -476,12 +476,3 @@ JobApplicationTracker-API/
 ```
 
 ---
-
-## License
-
-MIT
-
-## Author
-
-**Pradeep**  
-GitHub: [@pradeepv777](https://github.com/pradeepv777)
