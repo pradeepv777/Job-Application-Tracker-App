@@ -1,0 +1,93 @@
+<!-- ================================================================== -->
+<!-- ANALYTICS VIEW                                                     -->
+<!-- ================================================================== -->
+<section id="analytics-section" class="view-section">
+  <div class="dashboard-header">
+    <div class="dashboard-title">
+      <h2>Application & Interview Analytics</h2>
+      <p>Data-driven insights across your salary ranges and interview pipelines</p>
+    </div>
+    <button class="btn btn-secondary btn-sm" id="btn-refresh-analytics">Refresh Data</button>
+  </div>
+
+  <div id="analytics-loading" class="empty-state" style="display: none;">
+    <p>Loading analytics metrics...</p>
+  </div>
+
+  <div id="analytics-content">
+    <div class="analytics-grid">
+      <!-- Salary Stats -->
+      <div class="analytics-card">
+        <div class="analytics-card-title">Salary Overview</div>
+        <div class="metric-row">
+          <span class="metric-label">Average Salary</span>
+          <span class="metric-value" id="analytics-avg-salary">₹0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Highest Offered/Expected</span>
+          <span class="metric-value" id="analytics-highest-salary">₹0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Lowest Offered/Expected</span>
+          <span class="metric-value" id="analytics-lowest-salary">₹0</span>
+        </div>
+      </div>
+
+      <!-- Application Metrics & Success Rate -->
+      <div class="analytics-card">
+        <div class="analytics-card-title">
+          <span>Success Rate</span>
+          <span class="metric-value" id="analytics-success-rate">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="analytics-success-progress" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <div class="metric-row">
+            <span class="metric-label">Total Applications</span>
+            <span class="metric-value" id="analytics-total-apps">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Offers Received</span>
+            <span class="metric-value" id="analytics-offer-apps">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">In Interview Stage</span>
+            <span class="metric-value" id="analytics-interview-apps">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Applied</span>
+            <span class="metric-value" id="analytics-applied-apps">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Rejected</span>
+            <span class="metric-value" id="analytics-rejected-apps">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interview Pipeline Funnel -->
+      <div class="analytics-card">
+        <div class="analytics-card-title">Interview Funnel</div>
+        <div class="metric-row">
+          <span class="metric-label">Total Rounds Tracked</span>
+          <span class="metric-value" id="analytics-total-interviews">0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Upcoming Interviews</span>
+          <span class="metric-value" id="analytics-upcoming-interviews">0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Scheduled Rounds</span>
+          <span class="metric-value" id="analytics-scheduled-interviews">0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Completed Rounds</span>
+          <span class="metric-value" id="analytics-completed-interviews">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

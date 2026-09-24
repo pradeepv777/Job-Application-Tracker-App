@@ -442,7 +442,13 @@ JobApplicationTracker-API/
 │   ├── enums.py                # ApplicationStatus, InterviewResult
 │   └── main.py                 # FastAPI app, static frontend mount, middleware, routers
 ├── frontend/
-│   ├── index.html              # Single page application structure
+│   ├── index.html              # Lean SPA root with component container slots
+│   ├── components/             # Modular HTML component partials
+│   │   ├── header.html         # Header & navigation component
+│   │   ├── auth-view.html      # Authentication view (Sign in & Register)
+│   │   ├── dashboard-view.html # Applications table & status metrics view
+│   │   ├── analytics-view.html # Salary stats & pipeline funnel view
+│   │   └── modals.html         # Application, Interview, and Resume dialog modals
 │   ├── img/
 │   │   └── auth_bg.jpg         # High-resolution authentication backdrop visual
 │   ├── css/
@@ -454,6 +460,7 @@ JobApplicationTracker-API/
 │   └── js/
 │       ├── api.js              # Centralized fetch client & JWT handler
 │       ├── ui.js               # Shared presentation utilities & toast notifications
+│       ├── components-loader.js # Dynamic HTML component partials loader
 │       ├── auth.js             # Authentication form handling & session UI
 │       ├── applications.js     # Applications CRUD, dashboard counters & table
 │       ├── interviews.js       # Interview rounds management

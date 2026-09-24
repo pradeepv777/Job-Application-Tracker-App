@@ -1,5 +1,5 @@
 from datetime import date, time
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.enums import InterviewResult
 
 
@@ -14,6 +14,8 @@ class InterviewCreate(BaseModel):
 
 
 class InterviewRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     application_id: int
     round: str
@@ -22,9 +24,6 @@ class InterviewRead(BaseModel):
     interviewer: str
     notes: str
     result: InterviewResult
-
-    class Config:
-        from_attributes = True
 
 
 class InterviewUpdate(BaseModel):

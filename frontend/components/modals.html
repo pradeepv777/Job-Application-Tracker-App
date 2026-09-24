@@ -1,0 +1,149 @@
+<!-- ==================================================================== -->
+<!-- MODALS & DIALOG FORMS                                               -->
+<!-- ==================================================================== -->
+
+<!-- 1. Application Create / Edit Modal -->
+<div class="modal-overlay" id="app-modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="app-modal-title">New Job Application</h3>
+      <button class="modal-close-btn" id="app-modal-close" aria-label="Close dialog">&times;</button>
+    </div>
+    <form id="form-application">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="app-company">Company Name</label>
+          <input type="text" id="app-company" class="form-input" placeholder="e.g. Google, Stripe" minlength="2" maxlength="100" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="app-role">Role / Position</label>
+          <input type="text" id="app-role" class="form-input" placeholder="e.g. Software Engineer" minlength="3" maxlength="100" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="app-salary">Salary (INR / Annual)</label>
+          <input type="number" id="app-salary" class="form-input" placeholder="e.g. 1200000" min="10001" required>
+          <p class="form-hint">Must be greater than 10,000.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="app-status">Application Status</label>
+          <select id="app-status" class="form-select" required>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="app-modal-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="app-modal-submit">Save Application</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 2. Interview Rounds Management Modal -->
+<div class="modal-overlay" id="interview-modal-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title" id="interview-modal-title">Interviews</h3>
+      <button class="modal-close-btn" id="interview-modal-close" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Scheduled Rounds History -->
+      <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">Scheduled Rounds</h4>
+      <div id="interview-list-container" class="interview-list">
+        <!-- Populated dynamically via js/interviews.js -->
+      </div>
+
+      <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+
+      <!-- Schedule / Edit Round Form -->
+      <h4 id="interview-form-title" style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;">Schedule Interview Round</h4>
+      <form id="form-interview">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="int-round">Round Name</label>
+            <input type="text" id="int-round" class="form-input" placeholder="e.g. Technical Round 1" minlength="2" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="int-interviewer">Interviewer Name / Role</label>
+            <input type="text" id="int-interviewer" class="form-input" placeholder="e.g. Jane Doe (Tech Lead)" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="int-date">Date</label>
+            <input type="date" id="int-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="int-time">Time</label>
+            <input type="time" id="int-time" class="form-input" step="1" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="int-result">Status / Result</label>
+            <select id="int-result" class="form-select" required>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="int-notes">Notes / Feedback / Topics</label>
+          <textarea id="int-notes" class="form-textarea" placeholder="DSA, System Design, Preparation notes..." required></textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-interview-cancel-edit" style="display: none;">Cancel Edit</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-interview-submit">Schedule Round</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Resume Management Modal -->
+<div class="modal-overlay" id="resume-modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Resume Management</h3>
+      <button class="modal-close-btn" id="resume-modal-close" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        Upload your latest resume (PDF format, max 5 MB). You can download or replace it at any time.
+      </p>
+
+      <!-- Current Resume Metadata -->
+      <div id="resume-current-info" style="display: none;">
+        <div class="resume-status">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Current Uploaded Resume:</div>
+            <div id="resume-current-filename" style="font-size: 0.82rem; color: var(--text-muted); word-break: break-all;"></div>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-resume-download">Download</button>
+            <button type="button" class="btn btn-danger btn-sm" id="btn-resume-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="resume-none-msg" style="display: none; margin-bottom: 1rem;">
+        <p style="font-size: 0.88rem; color: var(--text-muted); font-style: italic;">No resume has been uploaded yet.</p>
+      </div>
+
+      <!-- Upload Form -->
+      <form id="form-resume-upload">
+        <div class="form-group">
+          <label class="form-label" for="resume-file-input">Select PDF File</label>
+          <input type="file" id="resume-file-input" class="form-input" accept="application/pdf" required>
+          <p class="form-hint">Accepted file type: PDF only. Maximum size: 5 MB.</p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Upload PDF</button>
+      </form>
+    </div>
+  </div>
+</div>

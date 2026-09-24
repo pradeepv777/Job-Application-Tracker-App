@@ -1,272 +1,147 @@
-/**
- * Job Application Tracker - Applications Module
- * Handles application CRUD, dashboard status metric cards,
- * search, filtering, sorting, pagination, and modal dialogs.
- */
-
 import { Api } from "./api.js";
-import { showToast, escapeHtml, formatCurrency } from "./ui.js";
+import { showToast, escapeHtml, formatCurrency, el } from "./ui.js";
 
-// Internal Applications State
 const appState = {
-  items: [],
-  page: 1,
-  limit: 10,
-  total: 0,
-  totalPages: 1,
-  search: "",
-  status: "",
-  sortBy: "id",
-  order: "asc",
+  items: [], page: 1, limit: 10, total: 0, totalPages: 1,
+  search: "", status: "", sortBy: "id", order: "asc",
   currentEditingAppId: null,
-  callbacks: {
-    onOpenInterviews: null,
-    onDataChanged: null
-  }
+  callbacks: { onOpenInterviews: null, onDataChanged: null }
 };
 
-/**
- * Fetch and render dashboard overview statistics cards
- */
 export async function loadDashboardStats() {
   try {
     const stats = await Api.getDashboard();
-    document.getElementById("stat-total").textContent = stats.total_applications ?? 0;
-    document.getElementById("stat-applied").textContent = stats.applied ?? 0;
-    document.getElementById("stat-interview").textContent = stats.interview ?? 0;
-    document.getElementById("stat-offer").textContent = stats.offer ?? 0;
-    document.getElementById("stat-rejected").textContent = stats.rejected ?? 0;
-  } catch (error) {
-    console.error("Failed to load dashboard statistics:", error);
+    ["total", "applied", "interview", "offer", "rejected"].forEach(k => {
+      el(`stat-${k}`).textContent = (k === "total" ? stats.total_applications : stats[k]) ?? 0;
+    });
+  } catch (err) {
+    console.error("Failed to load dashboard stats:", err);
   }
 }
 
-/**
- * Fetch and render the paginated application list
- */
 export async function loadApplications() {
-  const tbody = document.getElementById("applications-table-body");
-  const loadingState = document.getElementById("table-loading");
-  const emptyState = document.getElementById("table-empty");
-
+  const tbody = el("applications-table-body"), loading = el("table-loading"), empty = el("table-empty");
   try {
-    tbody.innerHTML = "";
-    loadingState.style.display = "block";
-    emptyState.style.display = "none";
-
+    tbody.innerHTML = ""; loading.style.display = "block"; empty.style.display = "none";
     const data = await Api.getApplications({
-      search: appState.search,
-      status: appState.status,
-      page: appState.page,
-      limit: appState.limit,
-      sortBy: appState.sortBy,
-      order: appState.order
+      search: appState.search, status: appState.status,
+      page: appState.page, limit: appState.limit,
+      sortBy: appState.sortBy, order: appState.order
     });
 
-    appState.items = data.items || [];
-    appState.page = data.page || 1;
-    appState.limit = data.limit || 10;
-    appState.total = data.total || 0;
-    appState.totalPages = data.total_pages || 1;
+    Object.assign(appState, {
+      items: data.items || [], page: data.page || 1, limit: data.limit || 10,
+      total: data.total || 0, totalPages: data.total_pages || 1
+    });
 
     renderApplicationsTable();
     renderPagination();
-  } catch (error) {
-    showToast(`Failed to load applications: ${error.message}`, "error");
+  } catch (err) {
+    showToast(`Failed to load applications: ${err.message}`, "error");
   } finally {
-    loadingState.style.display = "none";
+    loading.style.display = "none";
   }
 }
 
-/**
- * Render table rows for current applications
- */
 function renderApplicationsTable() {
-  const tbody = document.getElementById("applications-table-body");
-  const emptyState = document.getElementById("table-empty");
+  const tbody = el("applications-table-body"), empty = el("table-empty");
   tbody.innerHTML = "";
 
   if (appState.items.length === 0) {
-    emptyState.style.display = "block";
+    empty.style.display = "block";
     return;
   }
-
-  emptyState.style.display = "none";
+  empty.style.display = "none";
 
   appState.items.forEach(app => {
     const tr = document.createElement("tr");
-    const statusBadgeClass = `badge-${app.status.toLowerCase()}`;
-
     tr.innerHTML = `
       <td><strong>#${app.id}</strong></td>
       <td><strong>${escapeHtml(app.company)}</strong></td>
       <td>${escapeHtml(app.role)}</td>
       <td>${formatCurrency(app.salary)}</td>
-      <td><span class="badge ${statusBadgeClass}">${escapeHtml(app.status)}</span></td>
+      <td><span class="badge badge-${app.status.toLowerCase()}">${escapeHtml(app.status)}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn btn-secondary btn-sm btn-action-interview" data-id="${app.id}" title="Manage Interviews">
-            Interviews
-          </button>
-          <button class="btn btn-secondary btn-sm btn-action-edit" data-id="${app.id}" title="Edit Application">
-            Edit
-          </button>
-          <button class="btn btn-danger btn-sm btn-action-delete" data-id="${app.id}" title="Delete Application">
-            Delete
-          </button>
+          <button class="btn btn-secondary btn-sm btn-int" title="Manage Interviews">Interviews</button>
+          <button class="btn btn-secondary btn-sm btn-edit" title="Edit Application">Edit</button>
+          <button class="btn btn-danger btn-sm btn-del" title="Delete Application">Delete</button>
         </div>
       </td>
     `;
-
-    // Button event listeners
-    tr.querySelector(".btn-action-interview").addEventListener("click", () => {
-      if (typeof appState.callbacks.onOpenInterviews === "function") {
-        appState.callbacks.onOpenInterviews(app);
-      }
-    });
-
-    tr.querySelector(".btn-action-edit").addEventListener("click", () => openEditAppModal(app));
-    tr.querySelector(".btn-action-delete").addEventListener("click", () => handleDeleteApplication(app.id, app.company));
-
+    tr.querySelector(".btn-int").onclick = () => appState.callbacks.onOpenInterviews?.(app);
+    tr.querySelector(".btn-edit").onclick = () => openEditAppModal(app);
+    tr.querySelector(".btn-del").onclick = () => handleDeleteApplication(app.id, app.company);
     tbody.appendChild(tr);
   });
 }
 
-/**
- * Render pagination controls and summary text
- */
 function renderPagination() {
-  const pageInfo = document.getElementById("pagination-info");
-  const prevBtn = document.getElementById("btn-prev-page");
-  const nextBtn = document.getElementById("btn-next-page");
-
   const { page, totalPages, total, limit } = appState;
-  const startItem = total === 0 ? 0 : (page - 1) * limit + 1;
-  const endItem = Math.min(page * limit, total);
-
-  pageInfo.textContent = `Showing ${startItem}–${endItem} of ${total} applications (Page ${page} of ${totalPages})`;
-  prevBtn.disabled = page <= 1;
-  nextBtn.disabled = page >= totalPages;
+  const start = total === 0 ? 0 : (page - 1) * limit + 1, end = Math.min(page * limit, total);
+  el("pagination-info").textContent = `Showing ${start}–${end} of ${total} applications (Page ${page} of ${totalPages})`;
+  el("btn-prev-page").disabled = page <= 1;
+  el("btn-next-page").disabled = page >= totalPages;
 }
 
-/**
- * Setup toolbar controls (Search, Status Filter, Sort By, Sort Order, Page Limit)
- */
 function setupTableControls() {
-  const searchInput = document.getElementById("search-input");
-  const statusFilter = document.getElementById("filter-status");
-  const sortBySelect = document.getElementById("sort-by");
-  const sortOrderBtn = document.getElementById("btn-sort-order");
-  const limitSelect = document.getElementById("page-limit-select");
-  const prevBtn = document.getElementById("btn-prev-page");
-  const nextBtn = document.getElementById("btn-next-page");
-
-  // Debounced search
-  let searchTimeout = null;
-  searchInput.addEventListener("input", (e) => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      appState.search = e.target.value;
-      appState.page = 1;
-      loadApplications();
-    }, 300);
+  let timeout = null;
+  el("search-input")?.addEventListener("input", (e) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => { appState.search = e.target.value; appState.page = 1; loadApplications(); }, 300);
   });
 
-  // Status Filter Dropdown
-  statusFilter.addEventListener("change", (e) => {
-    appState.status = e.target.value;
-    appState.page = 1;
+  el("filter-status")?.addEventListener("change", (e) => {
+    appState.status = e.target.value; appState.page = 1; loadApplications();
+  });
+
+  el("sort-by")?.addEventListener("change", (e) => {
+    appState.sortBy = e.target.value; loadApplications();
+  });
+
+  el("btn-sort-order")?.addEventListener("click", () => {
+    appState.order = appState.order === "asc" ? "desc" : "asc";
+    el("btn-sort-order").textContent = appState.order.toUpperCase();
     loadApplications();
   });
 
-  // Sort Field Dropdown
-  sortBySelect.addEventListener("change", (e) => {
-    appState.sortBy = e.target.value;
-    loadApplications();
+  el("page-limit-select")?.addEventListener("change", (e) => {
+    appState.limit = parseInt(e.target.value, 10); appState.page = 1; loadApplications();
   });
 
-  // Sort Direction Toggle
-  sortOrderBtn.addEventListener("click", () => {
-    const isAsc = appState.order === "asc";
-    appState.order = isAsc ? "desc" : "asc";
-    sortOrderBtn.textContent = appState.order.toUpperCase();
-    loadApplications();
+  el("btn-prev-page")?.addEventListener("click", () => {
+    if (appState.page > 1) { appState.page--; loadApplications(); }
   });
 
-  // Page Size Selector
-  limitSelect.addEventListener("change", (e) => {
-    appState.limit = parseInt(e.target.value, 10);
-    appState.page = 1;
-    loadApplications();
-  });
-
-  // Pagination navigation
-  prevBtn.addEventListener("click", () => {
-    if (appState.page > 1) {
-      appState.page--;
-      loadApplications();
-    }
-  });
-
-  nextBtn.addEventListener("click", () => {
-    if (appState.page < appState.totalPages) {
-      appState.page++;
-      loadApplications();
-    }
+  el("btn-next-page")?.addEventListener("click", () => {
+    if (appState.page < appState.totalPages) { appState.page++; loadApplications(); }
   });
 }
 
-/**
- * Setup Application Create & Edit Modal Dialog
- */
 function setupApplicationModal() {
-  const modalOverlay = document.getElementById("app-modal-overlay");
-  const openNewBtn = document.getElementById("btn-new-application");
-  const closeBtn = document.getElementById("app-modal-close");
-  const cancelBtn = document.getElementById("app-modal-cancel");
-  const form = document.getElementById("form-application");
+  const modal = el("app-modal-overlay"), form = el("form-application");
+  const closeModal = () => { modal.classList.remove("active"); appState.currentEditingAppId = null; form.reset(); };
 
-  openNewBtn.addEventListener("click", () => {
+  el("btn-new-application")?.addEventListener("click", () => {
     appState.currentEditingAppId = null;
-    document.getElementById("app-modal-title").textContent = "New Job Application";
+    el("app-modal-title").textContent = "New Job Application";
     form.reset();
-    document.getElementById("app-status").value = "Applied";
-    modalOverlay.classList.add("active");
+    el("app-status").value = "Applied";
+    modal.classList.add("active");
   });
 
-  const closeModal = () => {
-    modalOverlay.classList.remove("active");
-    appState.currentEditingAppId = null;
-    form.reset();
-  };
+  el("app-modal-close")?.addEventListener("click", closeModal);
+  el("app-modal-cancel")?.addEventListener("click", closeModal);
+  modal?.addEventListener("click", (e) => e.target === modal && closeModal());
 
-  closeBtn.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
-  modalOverlay.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) closeModal();
-  });
-
-  // Submit Handler for Create / Update
-  form.addEventListener("submit", async (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const company = el("app-company").value.trim(), role = el("app-role").value.trim();
+    const salary = parseInt(el("app-salary").value, 10), status = el("app-status").value;
 
-    const company = document.getElementById("app-company").value.trim();
-    const role = document.getElementById("app-role").value.trim();
-    const salary = parseInt(document.getElementById("app-salary").value, 10);
-    const status = document.getElementById("app-status").value;
-
-    if (company.length < 2) {
-      showToast("Company name must be at least 2 characters.", "warning");
-      return;
-    }
-    if (role.length < 3) {
-      showToast("Role title must be at least 3 characters.", "warning");
-      return;
-    }
-    if (isNaN(salary) || salary <= 10000) {
-      showToast("Salary must be a number greater than 10,000.", "warning");
-      return;
-    }
+    if (company.length < 2) return showToast("Company name must be at least 2 characters.", "warning");
+    if (role.length < 3) return showToast("Role title must be at least 3 characters.", "warning");
+    if (isNaN(salary) || salary <= 10000) return showToast("Salary must be greater than 10,000.", "warning");
 
     const submitBtn = form.querySelector("button[type='submit']");
     submitBtn.disabled = true;
@@ -279,16 +154,12 @@ function setupApplicationModal() {
         await Api.createApplication({ company, role, salary, status });
         showToast(`Application for ${company} submitted!`, "success");
       }
-
       closeModal();
       await loadApplications();
       await loadDashboardStats();
-
-      if (typeof appState.callbacks.onDataChanged === "function") {
-        appState.callbacks.onDataChanged();
-      }
-    } catch (error) {
-      showToast(error.message, "error");
+      appState.callbacks.onDataChanged?.();
+    } catch (err) {
+      showToast(err.message, "error");
     } finally {
       submitBtn.disabled = false;
     }
@@ -297,44 +168,30 @@ function setupApplicationModal() {
 
 function openEditAppModal(app) {
   appState.currentEditingAppId = app.id;
-  document.getElementById("app-modal-title").textContent = `Edit Application #${app.id}`;
-  document.getElementById("app-company").value = app.company;
-  document.getElementById("app-role").value = app.role;
-  document.getElementById("app-salary").value = app.salary;
-  document.getElementById("app-status").value = app.status;
-
-  document.getElementById("app-modal-overlay").classList.add("active");
+  el("app-modal-title").textContent = `Edit Application #${app.id}`;
+  el("app-company").value = app.company;
+  el("app-role").value = app.role;
+  el("app-salary").value = app.salary;
+  el("app-status").value = app.status;
+  el("app-modal-overlay").classList.add("active");
 }
 
 async function handleDeleteApplication(id, company) {
-  if (!confirm(`Are you sure you want to delete the application for "${company}"? All related interviews will also be deleted.`)) {
-    return;
-  }
-
+  if (!confirm(`Are you sure you want to delete the application for "${company}"? All related interviews will also be deleted.`)) return;
   try {
     await Api.deleteApplication(id);
     showToast(`Application for ${company} deleted.`, "info");
     await loadApplications();
     await loadDashboardStats();
-
-    if (typeof appState.callbacks.onDataChanged === "function") {
-      appState.callbacks.onDataChanged();
-    }
-  } catch (error) {
-    showToast(`Failed to delete application: ${error.message}`, "error");
+    appState.callbacks.onDataChanged?.();
+  } catch (err) {
+    showToast(`Failed to delete application: ${err.message}`, "error");
   }
 }
 
-/**
- * Initialize application module
- * @param {object} options
- * @param {Function} options.onOpenInterviews - Invoked when user clicks "Interviews" on an application row
- * @param {Function} options.onDataChanged - Invoked when applications are added, edited, or removed
- */
 export function initApplications({ onOpenInterviews, onDataChanged } = {}) {
   appState.callbacks.onOpenInterviews = onOpenInterviews;
   appState.callbacks.onDataChanged = onDataChanged;
-
   setupTableControls();
   setupApplicationModal();
 }

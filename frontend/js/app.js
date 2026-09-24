@@ -7,6 +7,7 @@
 
 import { AuthStorage, setOnAuthExpired } from "./api.js";
 import { showToast } from "./ui.js";
+import { loadAllComponents } from "./components-loader.js";
 import { initAuth, renderAuthView, renderAppView } from "./auth.js";
 import { initApplications, loadApplications, loadDashboardStats } from "./applications.js";
 import { initInterviews, openInterviewsModal } from "./interviews.js";
@@ -63,7 +64,16 @@ setOnAuthExpired((message) => {
 /**
  * Initialize application modules and DOM event listeners
  */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // 1. Asynchronously load modular component HTML partials
+    await loadAllComponents();
+  } catch (err) {
+    console.error("Failed to load components:", err);
+    showToast("Failed to initialize UI templates", "error");
+    return;
+  }
+
   // Navigation tab click listeners
   const navBtns = document.querySelectorAll(".nav-btn[data-view]");
   navBtns.forEach(btn => {

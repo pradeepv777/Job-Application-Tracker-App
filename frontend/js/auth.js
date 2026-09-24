@@ -1,136 +1,83 @@
-/**
- * Job Application Tracker - Authentication Module
- * Manages user registration, login with OAuth2 password request,
- * logout, token storage persistence, and auth view toggling.
- */
-
 import { Api, AuthStorage } from "./api.js";
-import { showToast } from "./ui.js";
+import { showToast, el } from "./ui.js";
 
-/**
- * Display the unauthenticated view (Login/Register forms)
- */
 export function renderAuthView() {
-  document.getElementById("auth-section").classList.add("active");
-  document.getElementById("dashboard-section").classList.remove("active");
-  document.getElementById("analytics-section").classList.remove("active");
-  const header = document.getElementById("app-header");
+  el("auth-section").classList.add("active");
+  el("dashboard-section").classList.remove("active");
+  el("analytics-section").classList.remove("active");
+  const header = el("app-header");
   if (header) header.style.display = "none";
-  document.getElementById("nav-links").style.display = "none";
-  document.getElementById("user-profile").style.display = "none";
+  el("nav-links").style.display = "none";
+  el("user-profile").style.display = "none";
 }
 
-/**
- * Display the authenticated application view (Dashboard/Analytics)
- */
 export function renderAppView() {
-  document.getElementById("auth-section").classList.remove("active");
-  document.getElementById("dashboard-section").classList.add("active");
-  document.getElementById("analytics-section").classList.remove("active");
-  const header = document.getElementById("app-header");
+  el("auth-section").classList.remove("active");
+  el("dashboard-section").classList.add("active");
+  el("analytics-section").classList.remove("active");
+  const header = el("app-header");
   if (header) header.style.display = "block";
-  document.getElementById("nav-links").style.display = "flex";
-  document.getElementById("user-profile").style.display = "flex";
-
-  const userEmailSpan = document.getElementById("current-user-email");
-  if (userEmailSpan) {
-    userEmailSpan.textContent = AuthStorage.getUserEmail() || "Logged In";
-  }
+  el("nav-links").style.display = "flex";
+  el("user-profile").style.display = "flex";
+  const userEmail = el("current-user-email");
+  if (userEmail) userEmail.textContent = AuthStorage.getUserEmail() || "Logged In";
 }
 
-/**
- * Initialize authentication event listeners and form submissions
- * @param {object} callbacks
- * @param {Function} callbacks.onLoginSuccess - Callback invoked after successful login
- * @param {Function} callbacks.onLogout - Callback invoked after logout
- */
 export function initAuth({ onLoginSuccess, onLogout } = {}) {
-  const tabLogin = document.getElementById("tab-login-btn");
-  const tabRegister = document.getElementById("tab-register-btn");
-  const formLogin = document.getElementById("form-login");
-  const formRegister = document.getElementById("form-register");
-  const logoutBtn = document.getElementById("btn-logout");
+  const formLogin = el("form-login"), formRegister = el("form-register");
 
-  // Tab Switching: Sign In vs Register
-  tabLogin.addEventListener("click", () => {
-    tabLogin.classList.add("active");
-    tabRegister.classList.remove("active");
-    formLogin.style.display = "block";
-    formRegister.style.display = "none";
-  });
+  const toggleAuth = (showLogin) => {
+    formLogin.style.display = showLogin ? "block" : "none";
+    formRegister.style.display = showLogin ? "none" : "block";
+  };
 
-  tabRegister.addEventListener("click", () => {
-    tabRegister.classList.add("active");
-    tabLogin.classList.remove("active");
-    formLogin.style.display = "none";
-    formRegister.style.display = "block";
-  });
+  el("tab-login-btn")?.addEventListener("click", () => toggleAuth(true));
+  el("tab-register-btn")?.addEventListener("click", () => toggleAuth(false));
 
-  // Login Form Submission
   formLogin.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value;
-    const submitBtn = formLogin.querySelector("button[type='submit']");
-
-    if (!email || !password) {
-      showToast("Please enter both email and password.", "warning");
-      return;
-    }
-
+    const email = el("login-email").value.trim(), password = el("login-password").value;
+    const btn = formLogin.querySelector("button[type='submit']");
     try {
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Logging in...";
+      btn.disabled = true;
+      btn.textContent = "Logging in...";
       await Api.login(email, password);
       showToast("Logged in successfully!", "success");
       formLogin.reset();
       renderAppView();
-      if (typeof onLoginSuccess === "function") {
-        onLoginSuccess();
-      }
-    } catch (error) {
-      showToast(error.message, "error");
+      onLoginSuccess?.();
+    } catch (err) {
+      showToast(err.message, "error");
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Sign In";
+      btn.disabled = false;
+      btn.textContent = "Sign in";
     }
   });
 
-  // Register Form Submission
   formRegister.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const name = document.getElementById("reg-name").value.trim();
-    const email = document.getElementById("reg-email").value.trim();
-    const password = document.getElementById("reg-password").value;
-    const submitBtn = formRegister.querySelector("button[type='submit']");
-
-    if (password.length < 8) {
-      showToast("Password must be at least 8 characters long.", "warning");
-      return;
-    }
-
+    const name = el("reg-name").value.trim(), email = el("reg-email").value.trim(), password = el("reg-password").value;
+    if (password.length < 8) return showToast("Password must be at least 8 characters long.", "warning");
+    const btn = formRegister.querySelector("button[type='submit']");
     try {
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Registering...";
+      btn.disabled = true;
+      btn.textContent = "Registering...";
       const res = await Api.register(name, email, password);
       showToast(res.message || "Registration successful! You can now log in.", "success");
       formRegister.reset();
-      tabLogin.click(); // Switch to login tab
-    } catch (error) {
-      showToast(error.message, "error");
+      toggleAuth(true);
+    } catch (err) {
+      showToast(err.message, "error");
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Create Account";
+      btn.disabled = false;
+      btn.textContent = "Create Account";
     }
   });
 
-  // Logout Handler
-  logoutBtn.addEventListener("click", () => {
+  el("btn-logout")?.addEventListener("click", () => {
     Api.logout();
     showToast("You have been logged out.", "info");
     renderAuthView();
-    if (typeof onLogout === "function") {
-      onLogout();
-    }
+    onLogout?.();
   });
 }

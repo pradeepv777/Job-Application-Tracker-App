@@ -27,13 +27,15 @@ header.app-header {
   gap: 0.6rem;
   font-weight: 700;
   font-size: 1.15rem;
-  color: var(--primary);
+  color: var(--text-main);
   text-decoration: none;
+  letter-spacing: -0.02em;
 }
 
 .brand svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
+  stroke: var(--text-main);
 }
 
 /* Navigation Links */
@@ -64,8 +66,8 @@ nav.nav-links {
 }
 
 .nav-btn.active {
-  color: var(--primary);
-  background-color: var(--primary-light);
+  color: #ffffff;
+  background-color: var(--primary);
   font-weight: 600;
 }
 

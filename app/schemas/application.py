@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.enums import ApplicationStatus
 
 
@@ -16,14 +16,13 @@ class ApplicationResponse(BaseModel):
 
 
 class ApplicationRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     company: str
     role: str
     salary: int
     status: ApplicationStatus
-
-    class Config:
-        from_attributes = True  # Important for sqlalchemy to map to ORM
 
 
 class ApplicationUpdate(BaseModel):

@@ -174,7 +174,7 @@
 .auth-link-btn {
   background: none;
   border: none;
-  color: var(--primary);
+  color: #18181b;
   font-weight: 600;
   font-size: inherit;
   cursor: pointer;
@@ -186,7 +186,7 @@
 }
 
 .auth-link-btn:hover {
-  color: var(--primary-hover);
+  color: #000000;
 }
 
 /* Mobile Responsive Auth */
@@ -243,6 +243,12 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  border-color: #a1a1aa;
+  box-shadow: var(--shadow-md);
 }
 
 .stat-card::before {
@@ -251,15 +257,15 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
   background: var(--border);
 }
 
-.stat-card.total::before     { background: var(--primary); }
-.stat-card.applied::before   { background: var(--info); }
-.stat-card.interview::before { background: var(--warning); }
-.stat-card.offer::before     { background: var(--success); }
-.stat-card.rejected::before  { background: var(--danger); }
+.stat-card.total::before     { background: #18181b; }
+.stat-card.applied::before   { background: #52525b; }
+.stat-card.interview::before { background: #27272a; }
+.stat-card.offer::before     { background: #09090b; }
+.stat-card.rejected::before  { background: #a1a1aa; }
 
 .stat-label {
   font-size: 0.82rem;

@@ -8,10 +8,10 @@ def test_frontend_index_served(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type", "")
-    assert "JobTracker" in response.text
-    assert "auth-section" in response.text
-    assert "dashboard-section" in response.text
-    assert "analytics-section" in response.text
+    assert "Job Application Tracker" in response.text
+    assert "auth-container-slot" in response.text
+    assert "dashboard-container-slot" in response.text
+    assert "analytics-container-slot" in response.text
 
 
 def test_frontend_assets_served(client):
@@ -34,11 +34,23 @@ def test_frontend_assets_served(client):
         "/js/interviews.js",
         "/js/resume.js",
         "/js/analytics.js",
+        "/js/components-loader.js",
         "/js/app.js",
     ]:
         res = client.get(js_file)
         assert res.status_code == 200, f"Failed to fetch {js_file}"
         assert "javascript" in res.headers.get("content-type", ""), f"{js_file} not javascript MIME"
+
+    for component_file in [
+        "/components/header.html",
+        "/components/auth-view.html",
+        "/components/dashboard-view.html",
+        "/components/analytics-view.html",
+        "/components/modals.html",
+    ]:
+        res = client.get(component_file)
+        assert res.status_code == 200, f"Failed to fetch {component_file}"
+        assert "text/html" in res.headers.get("content-type", ""), f"{component_file} not text/html MIME"
 
 
 def test_api_routes_not_shadowed(client):
